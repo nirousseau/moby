@@ -250,7 +250,7 @@ echo 'Optional Features:'
 }
 {
 	if [ "$cgroupVersion" = "cgroup" ]; then
-		check_flags CGROUP_PIDS
+		check_flags CGROUP_PIDS CGROUP_HUGETLB
 	fi
 }
 {
@@ -314,7 +314,6 @@ fi
 check_flags \
 	BLK_CGROUP BLK_DEV_THROTTLING \
 	CGROUP_PERF \
-	CGROUP_HUGETLB \
 	NET_CLS_CGROUP $netprio \
 	CFS_BANDWIDTH FAIR_GROUP_SCHED \
 	IP_NF_TARGET_REDIRECT \
