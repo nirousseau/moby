@@ -34,7 +34,16 @@ kernelMajor="${kernelVersion%%.*}"
 kernelMinor="${kernelVersion#$kernelMajor.}"
 kernelMinor="${kernelMinor%%.*}"
 
-cgroupVersion="$(grep cgroup /proc/mounts | cut -d ' ' -f1)"
+check_cgroup() {
+    local sys_fs_cgroup="$(grep -E '\s+/sys/fs/cgroup\s+' /proc/mounts | head -n 1 | cut -d ' ' -f1)"
+
+    if [ "$sys_fs_cgroup" != "cgroup2" ]; then
+        echo 1
+        return
+    fi
+    echo 2
+}
+cgroupVersion=$(check_cgroup)
 
 is_set() {
 	zgrep "CONFIG_$1=[y|m]" "$CONFIG" > /dev/null
@@ -218,7 +227,7 @@ check_flags \
 	POSIX_MQUEUE
 # (POSIX_MQUEUE is required for bind-mounting /dev/mqueue into containers)
 
-if [ "$cgroupVersion" = "cgroup" ]; then
+if [ "$cgroupVersion" -eq 1 ]; then
 	check_flags CGROUP_FREEZER CGROUP_DEVICE CPUSETS CGROUP_CPUACCT MEMCG
 fi
 
@@ -249,7 +258,7 @@ echo 'Optional Features:'
 	check_flags SECCOMP_FILTER
 }
 {
-	if [ "$cgroupVersion" = "cgroup" ]; then
+	if [ "$cgroupVersion" -eq 1 ]; then
 		check_flags CGROUP_PIDS CGROUP_HUGETLB
 	fi
 }
